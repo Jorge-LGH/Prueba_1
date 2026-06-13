@@ -1,0 +1,100 @@
+---
+title: "Análisis de clasificación"
+output:
+  html_document:
+    toc: true
+    toc_float:
+      collapsed: false
+    number_sections: true
+date: "`r Sys.Date()`"
+editor_options: 
+  chunk_output_type: inline
+output_dir: "Estadistica/html_files"
+---
+
+## ¿Qué es el análisis de clasificación?
+
+El **análisis de clasificación** es una rama del aprendizaje supervisado (*supervised learning*) dentro del *machine learning*. Su objetivo es **asignar observaciones a categorías previamente definidas** con base en sus características (variables predictoras).
+
+A diferencia de métodos exploratorios como el clustering, en la clasificación:
+
+- Las **clases ya están definidas**.
+- Se utilizan datos etiquetados para entrenar el modelo.
+- El modelo aprende una regla para asignar nuevas observaciones a dichas clases.
+
+---
+
+## Entrenamiento y evaluación de modelos
+
+Para construir un modelo de clasificación, se utilizan datos previamente etiquetados.  
+Estos datos suelen dividirse en dos conjuntos:
+
+- **Conjunto de entrenamiento (training set)**: se usa para entrenar el modelo.
+- **Conjunto de prueba (test set)**: se usa para evaluar su desempeño.
+
+Una división común es:
+
+- 80% entrenamiento  
+- 20% prueba  
+
+El objetivo es evaluar qué tan bien el modelo puede **generalizar a datos nuevos**.
+
+---
+
+## Clasificación con K-Nearest Neighbors (K-NN)
+
+El algoritmo **K-Nearest Neighbors (K-NN)** es un método de clasificación **no paramétrico** basado en la proximidad entre observaciones.
+
+### ¿Cómo funciona?
+
+1. Cada observación se representa como un punto en un espacio de múltiples dimensiones (una por variable).
+2. Para clasificar un nuevo punto:
+   - Se calcula la distancia a todos los puntos del conjunto de entrenamiento.
+   - Se seleccionan los **K vecinos más cercanos**.
+   - Se asigna la clase más frecuente entre esos vecinos.
+
+El valor de **K** es un hiperparámetro importante:
+
+- K pequeño → modelo sensible al ruido  
+- K grande → modelo más estable pero menos flexible  
+
+### Ejemplo
+
+Utilizaremos la base de datos `iris` para demostras cómo se usa K-NN.
+
+```{r}
+library(class)
+
+# Cargar datos
+data(iris)
+
+# Variables predictoras
+predictores <- iris[,1:4]
+
+# Variable respuesta
+especie <- iris$Species
+
+# Dividir en entrenamiento (80%) y prueba (20%)
+set.seed(123)
+train_index <- sample(1:nrow(iris), size = 0.8*nrow(iris))
+
+X_train <- predictores[train_index,]
+X_test  <- predictores[-train_index,]
+
+y_train <- especie[train_index]
+y_test  <- especie[-train_index]
+
+# Clasificación con K = 5
+predicciones <- knn(train = X_train,
+                    test = X_test,
+                    cl = y_train,
+                    k = 5)
+
+# Matriz de confusión
+tabla <- table(Predicho = predicciones, Real = y_test)
+tabla
+
+# Exactitud
+accuracy <- sum(diag(tabla)) / sum(tabla)
+accuracy
+```
